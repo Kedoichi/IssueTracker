@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, Edit2, Trash2 } from 'lucide-react';
+import { PlusCircle, Edit2, Trash2, X } from 'lucide-react';
 
 const API_URL = 'http://localhost:5000/api/issues';
 
 function App() {
   const [issues, setIssues] = useState([]);
   const [newIssue, setNewIssue] = useState({ title: '', description: '', status: 'Open' });
+  const [editingIssue, setEditingIssue] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -41,6 +42,40 @@ function App() {
       setNewIssue({ title: '', description: '', status: 'Open' });
     } catch (error) {
       console.error('Error creating issue:', error);
+      setError(error.message);
+    }
+  };
+
+  const updateIssue = async (id, updatedIssue) => {
+    try {
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedIssue),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const updated = await response.json();
+      setIssues(issues.map(issue => issue._id === id ? updated : issue));
+      setEditingIssue(null);
+    } catch (error) {
+      console.error('Error updating issue:', error);
+      setError(error.message);
+    }
+  };
+
+  const deleteIssue = async (id) => {
+    try {
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      setIssues(issues.filter(issue => issue._id !== id));
+    } catch (error) {
+      console.error('Error deleting issue:', error);
       setError(error.message);
     }
   };
@@ -115,16 +150,63 @@ function App() {
                 {issue.status}
               </div>
               <div className="px-6 py-4">
-                <h3 className="font-bold text-xl mb-2 text-[#0b6472]">{issue.title}</h3>
-                <p className="text-gray-700 text-base mb-4">{issue.description}</p>
-                <div className="flex justify-end">
-                  <button className="bg-[#f2a444] hover:bg-[#e09333] text-white font-bold py-2 px-4 rounded mr-2">
-                    <Edit2 size={18} />
-                  </button>
-                  <button className="bg-[#f26526] hover:bg-[#e15415] text-white font-bold py-2 px-4 rounded">
-                    <Trash2 size={18} />
-                  </button>
-                </div>
+                {editingIssue === issue._id ? (
+                  <div>
+                    <input
+                      type="text"
+                      value={issue.title}
+                      onChange={(e) => setIssues(issues.map(i => i._id === issue._id ? {...i, title: e.target.value} : i))}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2"
+                    />
+                    <textarea
+                      value={issue.description}
+                      onChange={(e) => setIssues(issues.map(i => i._id === issue._id ? {...i, description: e.target.value} : i))}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-24 mb-2"
+                    />
+                    <select
+                      value={issue.status}
+                      onChange={(e) => setIssues(issues.map(i => i._id === issue._id ? {...i, status: e.target.value} : i))}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2"
+                    >
+                      <option value="Open">Open</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Closed">Closed</option>
+                    </select>
+                    <div className="flex justify-end">
+                      <button
+                        onClick={() => updateIssue(issue._id, issue)}
+                        className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setEditingIssue(null)}
+                        className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                      >
+                        <X size={18} />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <h3 className="font-bold text-xl mb-2 text-[#0b6472]">{issue.title}</h3>
+                    <p className="text-gray-700 text-base mb-4">{issue.description}</p>
+                    <div className="flex justify-end">
+                      <button
+                        onClick={() => setEditingIssue(issue._id)}
+                        className="bg-[#f2a444] hover:bg-[#e09333] text-white font-bold py-2 px-4 rounded mr-2"
+                      >
+                        <Edit2 size={18} />
+                      </button>
+                      <button
+                        onClick={() => deleteIssue(issue._id)}
+                        className="bg-[#f26526] hover:bg-[#e15415] text-white font-bold py-2 px-4 rounded"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           ))}
