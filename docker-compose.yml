@@ -1,0 +1,32 @@
+version: '1'
+services:
+  server:
+    build: ./server
+    ports:
+      - "${PORT}:${PORT}"
+    environment:
+      - MONGODB_URI=${MONGODB_URI}
+      - NODE_ENV=${NODE_ENV}
+      - PORT=${PORT}
+    depends_on:
+      - mongo
+
+  client:
+    build: 
+      context: ./client
+      args:
+        - REACT_APP_API_URL=${API_URL}
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
