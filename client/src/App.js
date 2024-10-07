@@ -45,10 +45,23 @@ function App() {
     }
   };
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Open':
+        return 'bg-blue-500';
+      case 'In Progress':
+        return 'bg-green-500';
+      case 'Closed':
+        return 'bg-red-500';
+      default:
+        return 'bg-gray-500';
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#f2e3c9]"> {/* Light beige background */}
+    <div className="min-h-screen bg-[#f2e3c9]">
       <div className="container mx-auto p-4">
-        <h1 className="text-4xl font-bold mb-6 text-center text-[#0b6472]">Issues Tracker</h1> {/* Teal text */}
+        <h1 className="text-4xl font-bold mb-6 text-center text-[#0b6472]">Issues Tracker</h1>
         
         {error && (
           <div className="bg-[#f26526] text-white px-4 py-3 rounded relative mb-4" role="alert">
@@ -97,17 +110,21 @@ function App() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {issues.map(issue => (
-            <div key={issue._id} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 border-t-4 border-[#0b6472]">
-              <h3 className="font-bold text-xl mb-2 text-[#0b6472]">{issue.title}</h3>
-              <p className="text-gray-700 text-base mb-4">{issue.description}</p>
-              <p className="text-sm text-[#f26526] mb-4 font-semibold">Status: {issue.status}</p>
-              <div className="flex justify-end">
-                <button className="bg-[#f2a444] hover:bg-[#e09333] text-white font-bold py-2 px-4 rounded mr-2">
-                  <Edit2 size={18} />
-                </button>
-                <button className="bg-[#f26526] hover:bg-[#e15415] text-white font-bold py-2 px-4 rounded">
-                  <Trash2 size={18} />
-                </button>
+            <div key={issue._id} className="bg-white shadow-md rounded overflow-hidden">
+              <div className={`${getStatusColor(issue.status)} text-white text-center py-2 font-bold`}>
+                {issue.status}
+              </div>
+              <div className="px-6 py-4">
+                <h3 className="font-bold text-xl mb-2 text-[#0b6472]">{issue.title}</h3>
+                <p className="text-gray-700 text-base mb-4">{issue.description}</p>
+                <div className="flex justify-end">
+                  <button className="bg-[#f2a444] hover:bg-[#e09333] text-white font-bold py-2 px-4 rounded mr-2">
+                    <Edit2 size={18} />
+                  </button>
+                  <button className="bg-[#f26526] hover:bg-[#e15415] text-white font-bold py-2 px-4 rounded">
+                    <Trash2 size={18} />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
