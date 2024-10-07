@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Edit2, Trash2, X } from 'lucide-react';
 
-const API_URL = 'http://localhost:5000/api/issues';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api/issues';
 
 function App() {
   const [issues, setIssues] = useState([]);
